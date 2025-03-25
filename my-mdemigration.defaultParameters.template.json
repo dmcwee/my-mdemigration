@@ -1,0 +1,14 @@
+{
+    "defaultParameters": [
+        {
+            "function":"Import-MyMdeExclusions",
+            "variable":"ClientId",
+            "value":"[YOUR TENANT ID HERE]"
+        },
+        {
+            "function":"Import-MyMdeExclusions",
+            "variable":"TenantId",
+            "value":"[YOUR TENANT ID HERE]"
+        }
+    ]
+}

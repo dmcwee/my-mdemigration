@@ -1,4 +1,23 @@
-﻿function Get-Policy {
+﻿function Get-DefaultParameters {
+    param(
+        [string]$ParamFile
+    )
+
+    if (Test-Path $ParamFile) {
+        $json = (Get-Content $ParamFile -raw -ErrorAction SilentlyContinue) | ConvertFrom-Json
+
+        $counter = 0
+        $json.defaultParameters | ForEach-Object {
+            $key = $_.function + ":" + $_.variable
+            $PSDefaultParameterValues[$key] = $_.value
+            $counter = $counter +1
+        }
+    } else {
+        Write-Error "File $ParamFile does not exist."
+    }
+}
+
+function Get-Policy {
     param(
         [string]$OsFamily,
         [string]$FileName)
@@ -15,8 +34,8 @@ function Import-MyMdeExclusions {
         [Parameter(Mandatory=$true)][string]$ExclusionFile,
         [Parameter(Mandatory=$true)][string]$PolicyName,
         [string]$PolicyDescription = "",
-        [string]$ClientId = "be5c1f31-9107-404f-b377-5c41ec77a124",
-        [string]$TenantId = "63cac711-f1e5-4a8d-b1bd-e3d1bfd471a2",
+        [Parameter(Mandatory=$true)][string]$ClientId,
+        [Parameter(Mandatory=$true)][string]$TenantId,
         [ValidateSet("Mac","Linux","Windows")][string]$OsFamily,
         [ValidateSet("Directory","Process","FileExt")][string]$ExclusionType
     )
@@ -134,3 +153,9 @@ function Write-JsonFile {
 
     Write-Debug "Policy written to $outputFilePath"
 }
+
+$mPath = (Get-Module -Name my-mdemigration).path
+$jPath = $mPath.Replace("my-mdemigration.psm1", "my-mdemigration.defaultParameters.json")
+$json = (Get-Content $jPath -raw -ErrorAction SilentlyContinue) | ConvertFrom-Json
+
+Get-DefaultParameters -ParamFile $jPath
