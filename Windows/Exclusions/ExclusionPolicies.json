@@ -1,0 +1,64 @@
+{
+    "Directory": {
+        "settingInstance": {
+            "@odata.type": "#microsoft.graph.deviceManagementConfigurationSimpleSettingCollectionInstance",
+            "settingDefinitionId": "device_vendor_msft_policy_config_defender_excludedpaths",
+            "settingInstanceTemplateReference": {
+                "settingInstanceTemplateId": "aaf04adc-c639-464f-b4a7-152e784092e8"
+            },
+            "simpleSettingCollectionValue": [
+                {
+                    "@odata.type": "#microsoft.graph.deviceManagementConfigurationStringSettingValue",
+                    "settingValueTemplateReference": null,
+                    "value": "c:\\weridstuff2"
+                }
+            ]
+        }
+    },
+    "File": {
+        "settingInstance": {
+            "@odata.type": "#microsoft.graph.deviceManagementConfigurationSimpleSettingCollectionInstance",
+            "settingDefinitionId": "device_vendor_msft_policy_config_defender_excludedpaths",
+            "settingInstanceTemplateReference": {
+                "settingInstanceTemplateId": "aaf04adc-c639-464f-b4a7-152e784092e8"
+            },
+            "simpleSettingCollectionValue": [
+                {
+                    "@odata.type": "#microsoft.graph.deviceManagementConfigurationStringSettingValue",
+                    "settingValueTemplateReference": null,
+                    "value": "c:\\weridstuff2"
+                }
+            ]
+        }
+    },
+    "FileExt": {
+        "settingInstance": {
+            "@odata.type": "#microsoft.graph.deviceManagementConfigurationSimpleSettingCollectionInstance",
+            "settingDefinitionId": "device_vendor_msft_policy_config_defender_excludedextensions",
+            "settingInstanceTemplateReference": {
+                "settingInstanceTemplateId": "c203725b-17dc-427b-9470-673a2ce9cd5e"
+            },
+            "simpleSettingCollectionValue": [
+                {
+                    "@odata.type": "#microsoft.graph.deviceManagementConfigurationStringSettingValue",
+                    "value": "extension"
+                }
+            ]
+        }
+    },
+    "Process": {
+        "settingInstance": {
+            "@odata.type": "#microsoft.graph.deviceManagementConfigurationSimpleSettingCollectionInstance",
+            "settingDefinitionId": "device_vendor_msft_policy_config_defender_excludedprocesses",
+            "settingInstanceTemplateReference": {
+                "settingInstanceTemplateId": "96b046ed-f138-4250-9ae0-b0772a93d16f"
+            },
+            "simpleSettingCollectionValue": [
+                {
+                    "@odata.type": "#microsoft.graph.deviceManagementConfigurationStringSettingValue",
+                    "value": "c:\\process\\process.exe"
+                }
+            ]
+        }
+    }
+}

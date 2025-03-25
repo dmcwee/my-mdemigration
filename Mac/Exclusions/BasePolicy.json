@@ -1,0 +1,23 @@
+{
+    "name": "Mac Exclusion Test Policy",
+    "description": "",
+    "settings": [
+        {
+            "@odata.type": "#microsoft.graph.deviceManagementConfigurationSetting",
+            "settingInstance": {
+                "@odata.type": "#microsoft.graph.deviceManagementConfigurationGroupSettingCollectionInstance",
+                "groupSettingCollectionValue": [ ],
+                
+                "settingInstanceTemplateReference": {
+                    "settingInstanceTemplateId": "16162b31-076e-43b6-9e35-3d1f4a248eee"
+                },
+                "settingDefinitionId": "com.apple.managedclient.preferences_exclusions"
+            }
+        }
+    ],
+    "platforms": "macOS",
+    "technologies": "mdm,appleRemoteManagement,microsoftSense",
+    "templateReference": {
+        "templateId": "43397174-2244-4006-b5ad-421b369e90d4_1"
+    }
+}

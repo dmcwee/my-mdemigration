@@ -1,0 +1,23 @@
+{
+    "name": "Linux exclusions",
+    "description": "",
+    "settings": [
+        {
+            "@odata.type": "#microsoft.graph.deviceManagementConfigurationSetting",
+            "settingInstance": {
+                "@odata.type": "#microsoft.graph.deviceManagementConfigurationGroupSettingCollectionInstance",
+                "groupSettingCollectionValue": [ ],
+                
+                "settingInstanceTemplateReference": {
+                    "settingInstanceTemplateId": "19436ea0-e842-4e29-861a-d8b781e1dcb5"
+                },
+                "settingDefinitionId": "linux_mdatp_managed_antivirusengine_exclusions"
+            }
+        }
+    ],
+    "platforms": "linux",
+    "technologies": "microsoftSense",
+    "templateReference": {
+        "templateId": "8a17a1e5-3df4-4e07-9d20-3878267a79b8_1"
+    }
+}
