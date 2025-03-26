@@ -11,9 +11,9 @@ if(!(Test-Path -Path .\$moduleName.defaultParameters.json) -or $force) {
 if(!(Test-Path -Path .\$moduleName.psm1) -or $force) {
     Copy-Item .\$moduleName.unsigned.psm1 -Destination .\$moduleName.psm1
 
-    $cert = Get-ChildItem -Path Cert:\CurrentUser\My -DnsName $moduleName@davidmcwee.com -ErrorAction SilentlyContinue
-    if(($null -eq $tCert) -or ($force)) {
-        $dnsName = "$moduleName@davidmcwee.com"
+    $dnsName = "$moduleName@davidmcwee.com"
+    $cert = Get-ChildItem -Path Cert:\CurrentUser\My -DnsName $dnsName -ErrorAction SilentlyContinue
+    if(($null -eq $cert) -or ($force)) {
         $crtName = "$moduleName.crt"
         $cert = New-SelfSignedCertificate -DnsName $dnsName -Type CodeSigning -CertStoreLocation Cert:\CurrentUser\My
         Export-Certificate -Cert $cert -FilePath $crtName

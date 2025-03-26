@@ -1,4 +1,4 @@
-﻿function Get-DefaultParameters {
+﻿function Import-MyDefaultParameters {
     param(
         [string]$ParamFile
     )
@@ -34,8 +34,8 @@ function Import-MyMdeExclusions {
         [Parameter(Mandatory=$true)][string]$ExclusionFile,
         [Parameter(Mandatory=$true)][string]$PolicyName,
         [string]$PolicyDescription = "",
-        [Parameter(Mandatory=$true)][string]$ClientId,
-        [Parameter(Mandatory=$true)][string]$TenantId,
+        [string]$ClientId = "",
+        [string]$TenantId = "",
         [ValidateSet("Mac","Linux","Windows")][string]$OsFamily,
         [ValidateSet("Directory","Process","FileExt")][string]$ExclusionType
     )
@@ -47,7 +47,7 @@ function Import-MyMdeExclusions {
 
     $policy = New-MyMdeExclusions -ExclusionFile $ExclusionFile -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily -ExclusionType $ExclusionType
     $body = $policy | ConvertTo-Json -Depth 12 -Compress
-    Write-Debug "*** START BODY ***" -
+    Write-Debug "*** START BODY ***"
     Write-Debug "$body"
     Write-Debug "*** END BODY ***"
 
@@ -55,7 +55,7 @@ function Import-MyMdeExclusions {
         Write-JsonFile -PolicyObject $policy
     }
 
-    Connect-MgGraph -ClientId $ClientId -TenantId $TenantId -Scopes DeviceManagementConfiguration.ReadWrite.All
+    Connect-MgGraph -ClientId $ClientId -TenantId $TenantId -Scopes DeviceManagementConfiguration.ReadWrite.All -NoWelcome
     Invoke-MgGraphRequest -Method POST -Uri https://graph.microsoft.com/beta/deviceManagement/configurationPolicies -Body $body -ContentType "application/json"
 }
 
@@ -82,6 +82,7 @@ function New-MyMdeExclusions {
 
             if($OsFamily -eq "Windows") {
                 $exclusion.settingInstance.simpleSettingCollectionValue[0].value = $str
+                $policy.settings += $exclusion
             } else {
                 if($ExclusionType -eq "Directory" -or $ExclusionType -eq "File") {
                     Write-Debug "Updating a directory exclusion value with $str"
@@ -90,11 +91,11 @@ function New-MyMdeExclusions {
                     Write-Debug "Updating a fileExt or Process exclusion value with $str"
                     $exclusion.children[0].choiceSettingValue.children[0].simpleSettingValue.value = $str
                 }
-            }
 
-            Write-Debug "Adding exclusion to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
-            $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
-            Write-Debug "Exclusion was added to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
+                Write-Debug "Adding exclusion to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
+                $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
+                Write-Debug "Exclusion was added to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
+            }
         }
 
         return $policy
@@ -158,4 +159,4 @@ $mPath = (Get-Module -Name my-mdemigration).path
 $jPath = $mPath.Replace("my-mdemigration.psm1", "my-mdemigration.defaultParameters.json")
 $json = (Get-Content $jPath -raw -ErrorAction SilentlyContinue) | ConvertFrom-Json
 
-Get-DefaultParameters -ParamFile $jPath
+Import-MyDefaultParameters -ParamFile $jPath
