@@ -59,6 +59,94 @@ function Import-MyMdeExclusions {
     Invoke-MgGraphRequest -Method POST -Uri https://graph.microsoft.com/beta/deviceManagement/configurationPolicies -Body $body -ContentType "application/json"
 }
 
+function Import-MyMdeCsvExclusions {
+    param(
+        [Parameter(Mandatory=$true)][string]$CsvFile,
+        [Parameter(Mandatory=$true)][string]$PolicyName,
+        [string]$PolicyDescription = "",
+        [Parameter(Mandatory=$true)][string]$ClientId,
+        [Parameter(Mandatory=$true)][string]$TenantId,
+        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily
+    )
+
+    if($PSBoundParameters['Debug']) {
+        Write-Debug "Changing DebugPreference from $DebugPreference to 'Continue'"
+        $DebugPreference = 'Continue'
+    }
+
+    if (Test-Path $CsvFile) {
+        $csvContent = Import-Csv -Path $CsvFile
+        $policy = New-MyBasePolicy -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily
+
+        foreach ($row in $csvContent) {
+            $exclusionText = $row.Column1
+            $exclusionType = $row.Column2
+            Write-Debug "Adding a $exclusionType with value $exclusionText"
+
+            $exclusion = New-MyMdeExclusions -ExclusionFile $exclusionText -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily -ExclusionType $exclusionType
+            if($OsFamily -eq "Windows") {
+                $policy.settings += $exclusion
+            } else {
+                $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
+            }
+            
+        }
+
+        $body = $policy | ConvertTo-Json -Depth 12 -Compress
+        Write-Debug "*** START BODY ***"
+        Write-Debug "$body"
+        Write-Debug "*** END BODY ***"
+
+        if($PSBoundParameters['Debug']) {
+            Write-JsonFile -PolicyObject $policy
+        }
+
+        Connect-MgGraph -ClientId $ClientId -TenantId $TenantId -Scopes DeviceManagementConfiguration.ReadWrite.All
+        Invoke-MgGraphRequest -Method POST -Uri https://graph.microsoft.com/beta/deviceManagement/configurationPolicies -Body $body -ContentType "application/json"
+    } else {
+        Write-Error "CSV file not found: $CsvFile"
+    }
+}
+
+function New-MyBasePolicy {
+    param(
+        [Parameter(Mandatory=$true)][string]$PolicyName,
+        [string]$PolicyDescription = "",
+        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily = "Windows",
+    )
+
+    $policy = Get-Policy $OsFamily -FileName "Exclusions\BasePolicy.json"
+    $policy.name = $PolicyName
+    $policy.description = $PolicyDescription
+
+    return $policy
+}
+
+function New-MyExclusionSetting {
+    param(
+        [Parameter(Mandatory=$true)][string]$ExclusionValue,
+        [ValidateSet("Directory","File","FileExt","Process")][string]$ExclusionType = "Directory",
+        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily = "Windows"
+    )
+
+    $exclusionTemplates = Get-Policy $OsFamily -FileName "Exclusions\ExclusionPolicies.json"
+    $exclusion = $exclusionTemplates.$ExclusionType
+
+    if($OsFamily -eq "Windows") {
+        $exclusion.settingInstance.simpleSettingCollectionValue[0].value = $ExclusionValue
+    } else {
+        if($ExclusionType -eq "Directory" -or $ExclusionType -eq "File") {
+            Write-Debug "Updating a directory exclusion value with $ExclusionValue"
+                $exclusion.children[0].choiceSettingValue.children[1].simpleSettingValue.value = $ExclusionValue
+        } else {
+            Write-Debug "Updating a fileExt or Process exclusion value with $ExclusionValue"
+            $exclusion.children[0].choiceSettingValue.children[0].simpleSettingValue.value = $ExclusionValue
+        }
+    }
+
+    return $exclusion
+}
+
 function New-MyMdeExclusions {
     param(
         [Parameter(Mandatory=$true)][string]$ExclusionFile,
@@ -68,9 +156,7 @@ function New-MyMdeExclusions {
         [ValidateSet("Directory","File","FileExt","Process")][string]$ExclusionType = "Directory"
     )
 
-    $policy = Get-Policy $OsFamily -FileName "Exclusions\BasePolicy.json"
-    $policy.name = $PolicyName
-    $policy.description = $PolicyDescription
+    $policy = New-MyBasePolicy -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily
 
     $exclusionTemplates = Get-Policy $OsFamily -FileName "Exclusions\ExclusionPolicies.json"
 
