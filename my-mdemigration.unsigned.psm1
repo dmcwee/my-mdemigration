@@ -4,14 +4,18 @@
     )
 
     if (Test-Path $ParamFile) {
-        $json = (Get-Content $ParamFile -raw -ErrorAction SilentlyContinue) | ConvertFrom-Json
+        Write-Debug "Import-MyDefaultParameters file $ParamFile is valid and being imported"
+        $json = Read-JsonFile -FilePath $ParamFile
 
         $counter = 0
         $json.defaultParameters | ForEach-Object {
             $key = $_.function + ":" + $_.variable
+            Write-Debug "Adding $key=$($_.value) to PSDefaultParameterValues."
+
             $PSDefaultParameterValues[$key] = $_.value
             $counter = $counter +1
         }
+        Write-Debug "Added $counter default parameters"
     } else {
         Write-Error "File $ParamFile does not exist."
     }
@@ -64,8 +68,8 @@ function Import-MyMdeCsvExclusions {
         [Parameter(Mandatory=$true)][string]$CsvFile,
         [Parameter(Mandatory=$true)][string]$PolicyName,
         [string]$PolicyDescription = "",
-        [Parameter(Mandatory=$true)][string]$ClientId,
-        [Parameter(Mandatory=$true)][string]$TenantId,
+        [string]$ClientId = "",
+        [string]$TenantId = "",
         [ValidateSet("Mac","Linux","Windows")][string]$OsFamily
     )
 
@@ -79,17 +83,16 @@ function Import-MyMdeCsvExclusions {
         $policy = New-MyBasePolicy -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily
 
         foreach ($row in $csvContent) {
-            $exclusionText = $row.Column1
-            $exclusionType = $row.Column2
+            $exclusionText = $row.Exclusion
+            $exclusionType = $row.ExclusionType
             Write-Debug "Adding a $exclusionType with value $exclusionText"
 
-            $exclusion = New-MyMdeExclusions -ExclusionFile $exclusionText -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily -ExclusionType $exclusionType
+            $exclusion = New-MyExclusionSetting -ExclusionValue $exclusionText -ExclusionType $exclusionType -OsFamily $OsFamily
             if($OsFamily -eq "Windows") {
                 $policy.settings += $exclusion
             } else {
                 $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
             }
-            
         }
 
         $body = $policy | ConvertTo-Json -Depth 12 -Compress
@@ -112,7 +115,7 @@ function New-MyBasePolicy {
     param(
         [Parameter(Mandatory=$true)][string]$PolicyName,
         [string]$PolicyDescription = "",
-        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily = "Windows",
+        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily = "Windows"
     )
 
     $policy = Get-Policy $OsFamily -FileName "Exclusions\BasePolicy.json"
@@ -129,15 +132,22 @@ function New-MyExclusionSetting {
         [ValidateSet("Mac","Linux","Windows")][string]$OsFamily = "Windows"
     )
 
+    #https://graph.microsoft.com/beta/deviceManagement/configurationPolicyTemplates('8a17a1e5-3df4-4e07-9d20-3878267a79b8_1')/settingTemplates?$expand=settingDefinitions&top=1000
+
     $exclusionTemplates = Get-Policy $OsFamily -FileName "Exclusions\ExclusionPolicies.json"
     $exclusion = $exclusionTemplates.$ExclusionType
 
     if($OsFamily -eq "Windows") {
         $exclusion.settingInstance.simpleSettingCollectionValue[0].value = $ExclusionValue
     } else {
+        #$settingInstanceGuid = New-Guid
+        #$settingValueGuid = New-Guid
+        #$exclusion.children[0].settingInstanceTemplateReference.settingInstanceTemplateId = $settingInstanceGuid
+        #$exclusion.children[0].choiceSettingValue.settingValueTemplateReference.settingValueTemplateId = $settingValueGuid
+
         if($ExclusionType -eq "Directory" -or $ExclusionType -eq "File") {
             Write-Debug "Updating a directory exclusion value with $ExclusionValue"
-                $exclusion.children[0].choiceSettingValue.children[1].simpleSettingValue.value = $ExclusionValue
+            $exclusion.children[0].choiceSettingValue.children[1].simpleSettingValue.value = $ExclusionValue
         } else {
             Write-Debug "Updating a fileExt or Process exclusion value with $ExclusionValue"
             $exclusion.children[0].choiceSettingValue.children[0].simpleSettingValue.value = $ExclusionValue
@@ -241,8 +251,8 @@ function Write-JsonFile {
     Write-Debug "Policy written to $outputFilePath"
 }
 
-$mPath = (Get-Module -Name my-mdemigration).path
-$jPath = $mPath.Replace("my-mdemigration.psm1", "my-mdemigration.defaultParameters.json")
+$mPath = (Get-Module -Name My-MdeMigration).path
+$jPath = $mPath.Replace("My-MdeMigration.psm1", "my-mdemigration.defaultParameters.json")
 $json = (Get-Content $jPath -raw -ErrorAction SilentlyContinue) | ConvertFrom-Json
 
 Import-MyDefaultParameters -ParamFile $jPath

@@ -5,15 +5,8 @@
             {
                 "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance",
                 "settingDefinitionId": "linux_mdatp_managed_antivirusengine_exclusions_item_$type",
-                "settingInstanceTemplateReference": {
-                    "settingInstanceTemplateId": "08bb2b44-765c-4005-a196-9d130b690190"
-                },
                 "choiceSettingValue": {
                     "value": "linux_mdatp_managed_antivirusengine_exclusions_item_$type_1",
-                    "settingValueTemplateReference": {
-                        "settingValueTemplateId": "acd7aa70-58af-4c3c-95d9-e2d5509acac2",
-                        "useTemplateDefault": false
-                    },
                     "children": [
                         {
                             "@odata.type": "#microsoft.graph.deviceManagementConfigurationSimpleSettingInstance",
@@ -34,20 +27,12 @@
             {
                 "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance",
                 "settingDefinitionId": "linux_mdatp_managed_antivirusengine_exclusions_item_$type",
-                "settingInstanceTemplateReference": {
-                    "settingInstanceTemplateId": "c1a735f4-e7d8-49b9-8ef0-3c5170b26cbb"
-                },
                 "choiceSettingValue": {
                     "value": "linux_mdatp_managed_antivirusengine_exclusions_item_$type_0",
-                    "settingValueTemplateReference": {
-                        "settingValueTemplateId": "195059b8-e9a8-4e21-90ff-66890c879750",
-                        "useTemplateDefault": false
-                    },
                     "children": [
                         {
                             "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance",
                             "settingDefinitionId": "linux_mdatp_managed_antivirusengine_exclusions_item_isdirectory",
-                            "settingInstanceTemplateReference": null,
                             "choiceSettingValue": {
                                 "settingValueTemplateReference": null,
                                 "value": "linux_mdatp_managed_antivirusengine_exclusions_item_isdirectory_true",
@@ -92,15 +77,9 @@
                             }
                         }
                     ],
-                    "settingValueTemplateReference": {
-                        "settingValueTemplateId": "ce1dd14b-c427-4bba-9752-d1028aef9d36"
-                    },
                     "value": "linux_mdatp_managed_antivirusengine_exclusions_item_$type_0"
                 },
-                "settingDefinitionId": "linux_mdatp_managed_antivirusengine_exclusions_item_$type",
-                "settingInstanceTemplateReference": {
-                    "settingInstanceTemplateId": "9966c16f-8dc4-40d6-9c90-e22bb7365ec7"
-                }
+                "settingDefinitionId": "linux_mdatp_managed_antivirusengine_exclusions_item_$type"
             }
         ]
     },
@@ -120,15 +99,9 @@
                             }
                         }
                     ],
-                    "settingValueTemplateReference": {
-                        "settingValueTemplateId": "acd7aa70-58af-4c3c-95d9-e2d5509acac2"
-                    },
                     "value": "linux_mdatp_managed_antivirusengine_exclusions_item_$type_2"
                 },
-                "settingDefinitionId": "linux_mdatp_managed_antivirusengine_exclusions_item_$type",
-                "settingInstanceTemplateReference": {
-                    "settingInstanceTemplateId": "08bb2b44-765c-4005-a196-9d130b690190"
-                }
+                "settingDefinitionId": "linux_mdatp_managed_antivirusengine_exclusions_item_$type"
             }
         ]
     }
