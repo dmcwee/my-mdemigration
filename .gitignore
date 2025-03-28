@@ -2,3 +2,4 @@ testing/
 my-mdemigration.crt
 my-mdemigration.defaultParameters.json
 my-mdemigration.psm1
+Windows/Exclusions/Full*.json

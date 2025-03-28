@@ -89,7 +89,20 @@ function Import-MyMdeCsvExclusions {
 
             $exclusion = New-MyExclusionSetting -ExclusionValue $exclusionText -ExclusionType $exclusionType -OsFamily $OsFamily
             if($OsFamily -eq "Windows") {
-                $policy.settings += $exclusion
+                Write-Debug "Searching for setting in policy"
+                $matchingSettingInstance = $policy.settings | Where-Object {
+                    $_.settingInstance.settingDefinitionId -eq $exclusion.settingInstance.settingDefinitionId
+                }
+
+                if($null -eq $matchingSettingInstance) {
+                    Write-Debug "No settingInstance found for $($exclusion.settingInstance.settingDefinitionId)"
+                    $policy.settings += $exclusion
+                }
+                else {
+                    Write-Debug "Adding $($exclusion.value.value) to the simpleSettingCollectionValue"
+                    $matchingSettingInstance.settingInstance.simpleSettingCollectionValue += $exclusion.settingInstance.simpleSettingCollectionValue[0];
+                }
+                
             } else {
                 $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
             }
@@ -140,11 +153,6 @@ function New-MyExclusionSetting {
     if($OsFamily -eq "Windows") {
         $exclusion.settingInstance.simpleSettingCollectionValue[0].value = $ExclusionValue
     } else {
-        #$settingInstanceGuid = New-Guid
-        #$settingValueGuid = New-Guid
-        #$exclusion.children[0].settingInstanceTemplateReference.settingInstanceTemplateId = $settingInstanceGuid
-        #$exclusion.children[0].choiceSettingValue.settingValueTemplateReference.settingValueTemplateId = $settingValueGuid
-
         if($ExclusionType -eq "Directory" -or $ExclusionType -eq "File") {
             Write-Debug "Updating a directory exclusion value with $ExclusionValue"
             $exclusion.children[0].choiceSettingValue.children[1].simpleSettingValue.value = $ExclusionValue
