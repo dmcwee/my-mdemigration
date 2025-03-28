@@ -4,15 +4,9 @@
             {
                 "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance",
                 "settingDefinitionId": "com.apple.managedclient.preferences_exclusions_item_$type",
-                "settingInstanceTemplateReference": {
-                    "settingInstanceTemplateId": "c82b1199-193b-45aa-bdfe-0d38a9001e82"
-                },
                 "choiceSettingValue": {
                     "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingValue",
                     "value": "com.apple.managedclient.preferences_exclusions_item_$type_0",
-                    "settingValueTemplateReference": {
-                        "settingValueTemplateId": "239ca1ae-4a48-472d-bb21-055da52a357a"
-                    },
                     "children": [
                         {
                             "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance",
@@ -41,15 +35,9 @@
             {
                 "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance",
                 "settingDefinitionId": "com.apple.managedclient.preferences_exclusions_item_$type",
-                "settingInstanceTemplateReference": {
-                    "settingInstanceTemplateId": "f30186fc-2254-4911-9111-d9028885bcba"
-                },
                 "choiceSettingValue": {
                     "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingValue",
                     "value": "com.apple.managedclient.preferences_exclusions_item_$type_1",
-                    "settingValueTemplateReference": {
-                        "settingValueTemplateId": "f1c063e4-da8e-42b4-9207-205b6633a24c"
-                    },
                     "children": [
                         {
                             "@odata.type": "#microsoft.graph.deviceManagementConfigurationSimpleSettingInstance",
@@ -80,15 +68,9 @@
                             }
                         }
                     ],
-                    "settingValueTemplateReference": {
-                        "settingValueTemplateId": "6c6c508d-0dda-465f-81ae-678452c0bc27"
-                    },
                     "value": "com.apple.managedclient.preferences_exclusions_item_$type_2"
                 },
-                "settingDefinitionId": "com.apple.managedclient.preferences_exclusions_item_$type",
-                "settingInstanceTemplateReference": {
-                    "settingInstanceTemplateId": "03b2d4e8-eb88-4e76-b7eb-bfa9ebf1f4eb"
-                }
+                "settingDefinitionId": "com.apple.managedclient.preferences_exclusions_item_$type"
             }
         ]
     },
