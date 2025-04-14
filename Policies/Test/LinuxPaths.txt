@@ -1,0 +1,3 @@
+/usr/local/mcwee/
+/usr/local/mcwee/david
+/usr/local/mcwee/run

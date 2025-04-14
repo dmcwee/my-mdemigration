@@ -1,0 +1,6 @@
+.txt
+.log
+.wee
+.mdf
+.ldf
+.pdf

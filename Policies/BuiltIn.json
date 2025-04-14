@@ -1,0 +1,250 @@
+[
+    {
+        "name":"Windows 'temp.edb files",
+        "paths": [
+            "\\\\SoftwareDistribution\\\\Datastore\\\\(.)*\\\\Datastore\\.edb",
+            "\\\\Microsoft\\\\Search\\\\Data\\\\Applications\\\\Windows\\\\windows\\.edb"
+        ]
+    },
+    {
+        "name":"Windows Update files or Automatic Update files",
+        "paths": [
+            "\\\\SoftwareDistribution\\\\Datastore\\\\(.)*\\\\Datastore\\.edb",
+            "\\\\SoftwareDistribution\\\\Datastore\\\\(.)*\\\\edb\\.chk",
+            "\\\\SoftwareDistribution\\\\Datastore\\\\*\\\\edb\\\\(.)*\\.log",
+            "\\\\SoftwareDistribution\\\\Datastore\\\\(.)*\\\\Edb\\\\(.)*\\.jrs",
+            "\\\\SoftwareDistribution\\\\Datastore\\\\(.)*\\\\Res\\\\(.)*\\.log"
+        ]
+    },
+    {
+        "name":"Windows Security Files",
+        "paths": [
+            "\\\\Security\\\\database\\\\(.)*\\.chk",
+            "\\\\Security\\\\database\\\\(.)*\\.edb",
+            "\\\\Security\\\\database\\\\(.)*\\.jrs",
+            "\\\\Security\\\\database\\\\(.)*\\.log",
+            "\\\\Security\\\\database\\\\(.)*\\.sdb"
+        ]
+    },
+    {
+        "name":"Group Policy file",
+        "paths":[
+            "\\\\NTUser.pol",
+            "\\\\System32\\\\GroupPolicy\\\\Machine\\\\registry.pol",
+            "\\\\System32\\\\GroupPolicy\\\\User\\\\registry.pol"
+        ]
+    },
+    {
+        "name":"WINS files",
+        "paths":[
+            "\\\\System32\\\\Wins\\\\(.)*\\\\(.)*\\.chk",
+            "\\\\System32\\\\Wins\\\\(.)*\\\\(.)*\\.log",
+            "\\\\System32\\\\Wins\\\\(.)*\\\\(.)*\\.mdb",
+            "\\\\System32\\\\LogFiles\\\\",
+            "\\\\SysWow64\\\\LogFiles\\\\"
+        ]
+    },
+    {
+        "name":"File Replication Service (FRS) working folder",
+        "paths":[
+            "\\\\System32\\\\Wins\\\\(.)*\\\\(.)*\\.chk",
+            "\\\\System32\\\\Wins\\\\(.)*\\\\(.)*\\.log",
+            "\\\\System32\\\\Wins\\\\(.)*\\\\(.)*\\.mdb",
+            "\\\\System32\\\\LogFiles\\\\",
+            "\\\\SysWow64\\\\LogFiles\\\\"
+        ],
+        "note": "Check against registry key: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\NtFrs\\Parameters\\Working Directory"
+    },
+    {
+        "name":"File Replication Service (FRS) Database log",
+        "paths":[
+            "\\\\Ntfrs\\\\(.)*\\\\Edb\\\\(.)*\\.log"
+        ],
+        "note":"Check against registry key: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\Ntfrs\\Parameters\\DB Log File Directory"
+    },
+    {
+        "name":"File Replication Service (FRS) staging folder",
+        "paths":[
+            "\\\\Sysvol\\\\(.)*\\\\Ntfrs_cmp(.)*\\\\"
+        ],
+        "note":"Check against registry key: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\NtFrs\\Parameters\\Replica Sets\\GUID\\Replica Set Stage"
+    },
+    {
+        "name":"File Replication Service (FRS) preinstall folder",
+        "paths":[
+            "\\\\SYSVOL\\\\domain\\\\(.)*\\\\(.)*\\\\Ntfrs(.)*\\\\"
+        ],
+        "note":"Check against Filter: Replica_root\\DO_NOT_REMOVE_NtFrs_PreInstall_Directory"
+    },
+    {
+        "name":"Distributed File System Replication (DFSR) database and working folders",
+        "paths":[
+            "\\\\System Volume Information\\\\DFSR\\\\\\$db_normal\\$",
+            "\\\\System Volume Information\\\\DFSR\\\\FileIDTable_(.)*",
+            "\\\\System Volume Information\\\\DFSR\\\\SimilarityTable_(.)*",
+            "\\\\System Volume Information\\\\DFSR\\\\(.)*\\.XML",
+            "\\\\System Volume Information\\\\DFSR\\\\\\$db_dirty\\$",
+            "\\\\System Volume Information\\\\DFSR\\\\\\$db_clean\\$",
+            "\\\\System Volume Information\\\\DFSR\\\\\\$db_lostl\\$",
+            "\\\\System Volume Information\\\\DFSR\\\\Dfsr\\.db",
+            "\\\\System Volume Information\\\\DFSR\\\\(.)*\\.frx",
+            "\\\\System Volume Information\\\\DFSR\\\\(.)*\\.log",
+            "\\\\System Volume Information\\\\DFSR\\\\Fsr(.)*\\.jrs",
+            "\\\\System Volume Information\\\\DFSR\\\\Tmp\\.edb"
+        ],
+        "note":"Check against registry key: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\DFSR\\Parameters\\Replication Groups\\GUID\\Replica Set Configuration File"
+    },
+    {
+        "name":"Process Exclusions",
+        "paths":[
+            "\\\\System32\\\\dfsr.exe",
+            "\\\\System32\\\\dfsrs.exe"
+        ]
+    },
+    {
+        "name":"Hyper-V Exclusions",
+        "paths":[
+            "(.)*\\.vhd",
+            "(.)*\\.vhdx",
+            "(.)*\\.avhd",
+            "(.)*\\.avhdx",
+            "(.)*\\.vsv",
+            "(.)*\\.iso",
+            "(.)*\\.rct",
+            "(.)*\\.vmcx",
+            "(.)*\\.vmrs",
+            "\\\\Microsoft\\\\Windows\\\\Hyper-V",
+            "\\\\Hyper-V",
+            "\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Hyper-V\\\\Snapshots",
+            "\\\\Documents\\\\Hyper-V\\\\Virtual Hard Disks",
+            "\\\\System32\\\\Vmms\\.exe",
+            "\\\\System32\\\\Vmwp\\.exe"
+        ]
+    },
+    {
+        "name":"SYSVOL files",
+        "paths":[
+            "\\\\Sysvol\\\\Domain\\\\(.)*\\.adm",
+            "\\\\Sysvol\\\\Domain\\\\(.)*\\.admx",
+            "\\\\Sysvol\\\\Domain\\\\(.)*\\.adml",
+            "\\\\Sysvol\\\\Domain\\\\Registry\\.pol",
+            "\\\\Sysvol\\\\Domain\\\\(.)*\\.aas",
+            "\\\\Sysvol\\\\Domain\\\\(.)*\\.inf",
+            "\\\\Sysvol\\\\Domain\\\\(.)*Scripts\\.ini",
+            "\\\\Sysvol\\\\Domain\\\\(.)*\\.ins",
+            "\\\\Sysvol\\\\Domain\\\\Oscfilter\\.ini"
+        ]
+    },
+    {
+        "name":"NTDS database files",
+        "paths":[
+            "\\\\Ntds\\\\ntds\\.dit",
+            "\\\\Ntds\\\\ntds\\.pat"
+        ],
+        "note":"Check against registry key: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\NTDS\\Parameters\\DSA Database File"
+    },
+    {
+        "name":"AD DS Transaction log files",
+        "paths":[
+            "\\\\Ntds\\\\EDB(.)*\\.log",
+            "\\\\Ntds\\\\Res(.)*\\.log",
+            "\\\\Ntds\\\\Edb(.)*\\.jrs",
+            "\\\\Ntds\\\\Ntds(.)*\\.pat",
+            "\\\\Ntds\\\\TEMP\\.edb"
+        ],
+        "note":"Check against registry key: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\NTDS\\Parameters\\Database Log Files Path"
+    },
+    {
+        "name":"NTDS Working Folder",
+        "paths":[
+            "\\\\Ntds\\\\Temp\\.edb",
+            "\\\\Ntds\\\\Edb\\.chk"
+        ],
+        "note":"Check folder path against registry key: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\NTDS\\Parameters\\DSA Working Directory"   
+    },
+    {
+        "name":"Process exclusion for AD DS and AD DS related support files",
+        "paths":[
+            "\\\\System32\\\\ntfrs\\.exe",
+            "\\\\System32\\\\lsass\\.exe"
+        ]
+    },
+    {
+        "name":"DHCP: Server exclusions",
+        "paths":[
+            "\\\\System32\\\\DHCP\\\\(.)*\\\\(.)*\\.mdb",
+            "\\\\System32\\\\DHCP\\\\(.)*\\\\(.)*\\.pat",
+            "\\\\System32\\\\DHCP\\\\(.)*\\\\(.)*\\.log",
+            "\\\\System32\\\\DHCP\\\\(.)*\\\\(.)*\\.chk",
+            "\\\\System32\\\\DHCP\\\\(.)*\\\\(.)*\\.edb"
+        ],
+        "note":"Check file locations against the values in the registry: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\DHCPServer\\Parameters"
+    },
+    {
+        "name":"DNS: Server File, folder, and process exclusions",
+        "paths":[
+            "\\\\System32\\\\Dns\\\\(.)*\\\\(.)*\\.log",
+            "\\\\System32\\\\Dns\\\\(.)*\\\\(.)*\\.dns",
+            "\\\\System32\\\\Dns\\\\(.)*\\\\(.)*\\.scc",
+            "\\\\System32\\\\Dns\\\\(.)*\\\\BOOT",
+            "\\\\System32\\\\dns\\.exe"
+        ]
+    },
+    {
+        "name":"File and Storage Services exclusions",
+        "paths":[
+            "\\\\ClusterStorage",
+            "\\\\Local Settings\\\\Temp",
+            "\\\\mscs"
+        ]   
+    },
+    {
+        "name":"Print Server File type, Folder, and Process exclusions",
+        "paths":[
+            "(.)*\\.shd",
+            "(.)*\\.spl",
+            "\\\\spool\\\\printers\\\\(.)*",
+            "spoolsv\\.exe"
+        ]
+    },
+    {
+        "name":"Web Server Exclusions",
+        "paths":[
+            "\\\\IIS Temporary Compressed Files",
+            "\\\\inetpub\\\\temp\\\\IIS Temporary Compressed Files",
+            "\\\\inetpub\\\\temp\\\\ASP Compiled Templates",
+            "\\\\inetpub\\\\logs",
+            "\\\\inetpub\\\\wwwroot",
+            "\\\\system32\\\\inetsrv\\\\w3wp\\.exe",
+            "\\\\SysWOW64\\\\inetsrv\\\\w3wp\\.exe",
+            "\\\\PHP5433\\\\php-cgi\\.exe"
+        ]
+    },
+    {
+        "name":"Sysvol File and Folder",
+        "paths":[
+            "\\\\Sysvol\\\\Domain",
+            "\\\\Sysvol_DFSR\\\\Domain",
+            "(.)*\\.adm",
+            "(.)*\\.admx",
+            "(.)*\\.adml",
+            "Registry.pol",
+            "Registry.tmp",
+            "(.)*\\.aas",
+            "(.)*\\.inf",
+            "Scripts.ini",
+            "(.)*\\.ins",
+            "Ocsfilter.ini"
+        ]
+    },
+    {
+        "name":"Windows Server Update Services exclusions",
+        "paths": [
+            "\\\\WSUS\\\\WSUSContent",
+            "\\\\WSUS\\\\UpdateServicesDBFiles",
+            "\\\\SoftwareDistribution\\\\Datastore",
+            "\\\\SoftwareDistribution\\\\Download"
+        ],
+        "note":"The WSUS folder is specified in the registry key HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Update Services\\Server\\Setup"
+    }
+]

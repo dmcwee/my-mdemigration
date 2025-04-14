@@ -1,0 +1,38 @@
+Exclusion, ExclusionType, Source
+sqlservr.exe, Process, Standard SQL
+sqlagent.exe, Process, Standard SQL
+sqlbrowser.exe, Process, Standard SQL
+%ProgramFiles%\Microsoft SQL Server\1??\Shared\SQLDumper.exe, Process, Standard SQL
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.MSSQLSERVER\MSSQL\FTDATA\, Process, Full-Text catalog files (Default Instance)
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.*\MSSQL\FTDATA\, Process, Full-Text catalog files (Names Instance)
+%ProgramFiles(x86)%\Microsoft SQL Server\???\COM\, Process, SQL Replication
+%ProgramFiles%\Microsoft SQL Server\???\COM\, Process, SQL Replication
+%ProgramFiles%\Microsoft SQL Server\*.*\Reporting Services\ReportServer\bin\ReportingServicesService.exe, Process, Sql Server Reporting Services 2014
+%ProgramFiles%\Microsoft SQL Server\\MSAS??.MSSQLSERVER\OLAP\bin\MSMDSrv.exe, Process, SQL Analysis Services (Default Instance)
+%ProgramFiles%\Microsoft SQL Server\MSAS??.*\OLAP\bin\MSMDSrv.exe, Process, SQL Analysis Servies (Named Instance)
+mdf, FileExt, Standard SQL
+ldf, FileExt, Standard SQL
+ndf, FileExt, Standard SQL
+bak, FileExt, Standard SQL
+trn, FileExt, Standard SQL
+sch, FileExt, SQL Replication
+idx, FileExt, SQL Replication 
+bcp, FileExt, SQL Replication
+pre, FileExt, SQL Replication
+cft, FileExt, SQL Replication
+dri, FileExt, SQL Replication
+trg, FileExt, SQL Replication
+prc, FileExt, SQL Replication
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.MSSQLSERVER\MSSQL\DATA, Directory, Standard SQL (Default Instance)
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.*\MSSQL\DATA, Directory, Standard SQL (Named Instance)
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.MSSQLSERVER\MSSQL\Backup, Directory, Standard SQL (Default Instance)
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.*\MSSQL\Backup, Directory, Standard SQL (Named Instance)
+%ProgramFiles%\Microsoft SQL Server\MSAS??.MSSQLSERVER\OLAP\Data, Directory, Sql Analysis Services (Default Instance)
+%ProgramFiles%\Microsoft SQL Server\MSAS??.*\OLAP\Data, Directory, Sql Analysis Services (Named Instance)
+%ProgramFiles%\Microsoft SQL Server\MSAS??.MSSQLSERVER\OLAP\Backup, Directory, Sql Analysis Services Backup (Default Instance)
+%ProgramFiles%\Microsoft SQL Server\MSAS??.*\OLAP\Backup, Directory, Sql Analysis Services Backup (Named Instance)
+%ProgramFiles%\Microsoft SQL Server\MSAS??.MSSQLSERVER\OLAP\Log, Directory, Sql Analysis Services Log Folder (Default Instance)
+%ProgramFiles%\Microsoft SQL Server\MSAS??.*\OLAP\Log, Directory, Sql Analysis Services Log Folder (Named Instance)
+%ProgramFiles%\Microsoft SQL Server\MSRC??.MSSQLSERVER\Reporting Services, Directory, Sql Reporting Services (Default Instance)
+%ProgramFiles%\Microsoft SQL Server\MSRC??.*\Reporting Services, Directory, Sql Reporting Services (Named Instance)
+%ProgramFiles%\Microsoft SQL Server Reporting Services\Shared Tools, Directory, Sql Reporting Services 2017 or later

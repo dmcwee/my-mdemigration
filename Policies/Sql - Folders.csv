@@ -1,0 +1,13 @@
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.MSSQLSERVER\MSSQL\DATA
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.*\MSSQL\DATA
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.MSSQLSERVER\MSSQL\Backup
+%ProgramFiles%\Microsoft SQL Server\MSSQL??.*\MSSQL\Backup
+%ProgramFiles%\Microsoft SQL Server\MSAS??.MSSQLSERVER\OLAP\Data
+%ProgramFiles%\Microsoft SQL Server\MSAS??.*\OLAP\Data
+%ProgramFiles%\Microsoft SQL Server\MSAS??.MSSQLSERVER\OLAP\Backup
+%ProgramFiles%\Microsoft SQL Server\MSAS??.*\OLAP\Backup
+%ProgramFiles%\Microsoft SQL Server\MSAS??.MSSQLSERVER\OLAP\Log
+%ProgramFiles%\Microsoft SQL Server\MSAS??.*\OLAP\Log
+%ProgramFiles%\Microsoft SQL Server\MSRC??.MSSQLSERVER\Reporting Services
+%ProgramFiles%\Microsoft SQL Server\MSRC??.*\Reporting Services
+%ProgramFiles%\Microsoft SQL Server Reporting Services\Shared Tools

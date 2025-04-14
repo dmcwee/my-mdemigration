@@ -1,0 +1,6 @@
+Exclusion,ExclusionType
+C:\Windows\SoftwareDistribution\Datastore\, Directory
+C:\Windows\SoftwareDistribution\Datastore\Logs\, Directory
+.wee, FileExt
+C:\Program Files\McWee\David.exe, Process
+C:\Program Files\McWee\David.docx, File

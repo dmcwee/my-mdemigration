@@ -1,0 +1,4 @@
+C:\Windows\SoftwareDistribution\Datastore\
+C:\Windows\SoftwareDistribution\Datastore\Logs\
+C:\Program Files\McWee\David.exe
+C:\Program Files\McWee\David.docx

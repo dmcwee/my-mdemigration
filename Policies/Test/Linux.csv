@@ -1,0 +1,5 @@
+Exclusion,ExclusionType
+/usr/local/mcwee/, Directory
+/usr/local/mcwee/david, File
+.log, FileExt
+/usr/local/mcwee/run, Process
