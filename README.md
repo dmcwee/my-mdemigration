@@ -46,18 +46,26 @@ The next items outline actions you should perform after install the My-MdeMigrat
 You should use a registered application in your organization's Entra Tenant to limit and monitor the scopes
 used by My-MdeMigration module. Follow [these instructions](https://learn.microsoft.com/en-us/powershell/microsoftgraph/authentication-commands?view=graph-powershell-1.0#use-delegated-access-with-a-custom-application-for-microsoft-graph-powershell) to create a local application.
 
+On the App Registration's Authentication page be sure to add the **Mobile and desktop applications** platform, and `http://localhost` as one of the URIs.
+
+![My MDE Migration Authentication Platform Screenshot](./my-mdemigration.png "My MDE Migration Authentication Platform Screenshot")
+
 The Client Id and Tenant Id will be necesary when running the module's Import commands.
 
 ## Usage
+
+> PowerShell's `Get-Help` is implemented for all public functions of the module.
 
 Currently the primary use case for My-MdeMigration module is to accelerate the ability of organizations to create
 Microsoft Defender Antivirus Exclusion policies.
 
 ### Import-MyMdeCsvExclusions
 
-The Import-MyMdeCsvExclusions accepts a CSV file, Policy Name, ClientId, TenantId, Target OS.
+The Import-MyMdeCsvExclusions accepts a CSV file, Policy Name, ClientId, TenantId, Target OS, and the ExcludeDefaults switch.
 
 > **Note:** Running in Debug will cause a JSON file of the policy to be generated in the local directory.
+
+**NEW:** Using the ExcludeDefaults switch will automatically check the exclusion paths against the default set of exclusions for MDE Windows Server features and if a match exists then the path will not be included as part of the policy when it is created. *Warning:* Some checks are performed for folder level exclusions when file exclusions are specified by the MDE Exclusion documentation, but may still be necessary in an environment. Users should review the policies after import for any potential omissions.
 
 The CSV file should be formatted as follows:
 
@@ -89,7 +97,4 @@ generate a valid Microsoft Defender Antivirus Exclusion policy in the MDE servic
 
 > **Note:** Running in Debug will cause a JSON file of the policy to be generated in the local directory.
 
-### New-MyMdeExclusionsFile
-
-The New-MyMdeExclusionsFile accepts a file with a list, one entry per line, of exclusion (File Extension, Directory, File, Process) and will
-generate a valid JSON file that represents a Microsoft Defender Antivirus Exclusion policy in the local directory.
+**NEW:** Using the ExcludeDefaults switch will automatically check the exclusion paths against the default set of exclusions for MDE Windows Server features and if a match exists then the path will not be included as part of the policy when it is created. *Warning:* Some checks are performed for folder level exclusions when file exclusions are specified by the MDE Exclusion documentation, but may still be necessary in an environment. Users should review the policies after import for any potential omissions.
