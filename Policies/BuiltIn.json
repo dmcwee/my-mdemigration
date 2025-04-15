@@ -4,6 +4,12 @@
         "paths": [
             "\\\\SoftwareDistribution\\\\Datastore\\\\(.)*\\\\Datastore\\.edb",
             "\\\\Microsoft\\\\Search\\\\Data\\\\Applications\\\\Windows\\\\windows\\.edb"
+        ],
+        "warn": [
+            "\\\\SoftwareDistribution(\\\\)?$",
+            "\\\\SoftwareDistribution\\\\Datastore\\\\(.)*(\\\\)?$",
+            "\\\\Microsoft\\\\Search\\\\Data\\\\Applications\\\\Windows\\\\$",
+            "^(\\.)edb"
         ]
     },
     {
@@ -24,6 +30,9 @@
             "\\\\Security\\\\database\\\\(.)*\\.jrs",
             "\\\\Security\\\\database\\\\(.)*\\.log",
             "\\\\Security\\\\database\\\\(.)*\\.sdb"
+        ],
+        "warn": [
+            "\\\\Security\\\\database(\\\\)?$"
         ]
     },
     {
@@ -32,6 +41,10 @@
             "\\\\NTUser.pol",
             "\\\\System32\\\\GroupPolicy\\\\Machine\\\\registry.pol",
             "\\\\System32\\\\GroupPolicy\\\\User\\\\registry.pol"
+        ],
+        "warn": [
+            "\\\\System32\\\\GroupPolicy\\\\Machine(\\\\?)$",
+            "\\\\System32\\\\GroupPolicy\\\\User(\\\\)?$"
         ]
     },
     {
@@ -59,6 +72,10 @@
         "name":"File Replication Service (FRS) Database log",
         "paths":[
             "\\\\Ntfrs\\\\(.)*\\\\Edb\\\\(.)*\\.log"
+        ],
+        "warn": [
+            "\\\\Ntfrs\\\\(.)*\\\\Edb(\\\\)?$",
+            "\\\\Ntfrs(\\\\)?$"
         ],
         "note":"Check against registry key: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\Ntfrs\\Parameters\\DB Log File Directory"
     },
@@ -133,6 +150,17 @@
             "\\\\Sysvol\\\\Domain\\\\(.)*Scripts\\.ini",
             "\\\\Sysvol\\\\Domain\\\\(.)*\\.ins",
             "\\\\Sysvol\\\\Domain\\\\Oscfilter\\.ini"
+        ],
+        "warn":[
+            "\\\\Sysvol\\\\Domain\\\\",
+            "^(\\.)?adm",
+            "^(\\.)?admx",
+            "^(\\.)?adml",
+            "^(\\.)?ini",
+            "^(\\.)?pol",
+            "^(\\.)?aas",
+            "^(\\.)?inf",
+            "^(\\.)?ins"
         ]
     },
     {
@@ -140,6 +168,9 @@
         "paths":[
             "\\\\Ntds\\\\ntds\\.dit",
             "\\\\Ntds\\\\ntds\\.pat"
+        ],
+        "warn": [
+            "\\\\Ntds(\\\\)?$"
         ],
         "note":"Check against registry key: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\NTDS\\Parameters\\DSA Database File"
     },
@@ -178,16 +209,22 @@
             "\\\\System32\\\\DHCP\\\\(.)*\\\\(.)*\\.chk",
             "\\\\System32\\\\DHCP\\\\(.)*\\\\(.)*\\.edb"
         ],
+        "warn": [
+            "\\\\System32\\\\DHCP(\\\\)?$"
+        ],
         "note":"Check file locations against the values in the registry: HKEY_LOCAL_MACHINE\\System\\CurrentControlSet\\Services\\DHCPServer\\Parameters"
     },
     {
         "name":"DNS: Server File, folder, and process exclusions",
         "paths":[
-            "\\\\System32\\\\Dns\\\\(.)*\\\\(.)*\\.log",
-            "\\\\System32\\\\Dns\\\\(.)*\\\\(.)*\\.dns",
-            "\\\\System32\\\\Dns\\\\(.)*\\\\(.)*\\.scc",
-            "\\\\System32\\\\Dns\\\\(.)*\\\\BOOT",
+            "\\\\System32\\\\dns\\\\(.)*\\\\(.)*\\.log",
+            "\\\\System32\\\\dns\\\\(.)*\\\\(.)*\\.dns",
+            "\\\\System32\\\\dns\\\\(.)*\\\\(.)*\\.scc",
+            "\\\\System32\\\\dns\\\\(.)*\\\\BOOT",
             "\\\\System32\\\\dns\\.exe"
+        ],
+        "warn": [
+            "\\\\System32\\\\dns(\\\\)?$"
         ]
     },
     {
@@ -205,12 +242,15 @@
             "(.)*\\.spl",
             "\\\\spool\\\\printers\\\\(.)*",
             "spoolsv\\.exe"
+        ],
+        "warn": [
+            "\\\\spool(\\\\)?$"
         ]
     },
     {
         "name":"Web Server Exclusions",
         "paths":[
-            "\\\\IIS Temporary Compressed Files",
+            "\\\\IIS Temporary Compressed Files(\\\\)?",
             "\\\\inetpub\\\\temp\\\\IIS Temporary Compressed Files",
             "\\\\inetpub\\\\temp\\\\ASP Compiled Templates",
             "\\\\inetpub\\\\logs",
@@ -218,6 +258,10 @@
             "\\\\system32\\\\inetsrv\\\\w3wp\\.exe",
             "\\\\SysWOW64\\\\inetsrv\\\\w3wp\\.exe",
             "\\\\PHP5433\\\\php-cgi\\.exe"
+        ],
+        "warn": [
+            "\\\\inetpub(\\\\)?$",
+            "\\\\SysWOW64\\\\inetsrv(\\\\)?$"
         ]
     },
     {
@@ -235,6 +279,9 @@
             "Scripts.ini",
             "(.)*\\.ins",
             "Ocsfilter.ini"
+        ],
+        "warn": [
+            "\\\\Sysvol(\\\\)?$"
         ]
     },
     {

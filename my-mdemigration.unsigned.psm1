@@ -16,7 +16,8 @@
 function Get-MyMatchingExclusionGroup {
     param(
         $ExclusionGroups,
-        [Parameter(Mandatory=$true)][string]$InputString
+        [Parameter(Mandatory=$true)][string]$InputString,
+        [switch]$ReturnWarning
     )
 
     foreach ($group in $ExclusionGroups) {
@@ -24,6 +25,16 @@ function Get-MyMatchingExclusionGroup {
             if ($InputString -match $regex) {
                 Write-Debug "Match found in group: $($group.name)"
                 return $group.name
+            }
+        }
+
+        foreach ($regex in $group.warn) {
+            if($InputString -match $regex) {
+                if($returnWarning) {
+                    return $group.name
+                } else {
+                    Write-Warning "The exclusion '$InputString' is not part of the default exclusions but may not be recommended."
+                }
             }
         }
     }
@@ -106,7 +117,7 @@ function Import-MyDefaultParameters {
         $PSDefaultParameterValues.Add($key, $value)
     }
 }
-Export-ModuleMember -Function Import-MyDefaultParameters
+# Export-ModuleMember -Function Import-MyDefaultParameters
 
 <#
  .Synopsis
@@ -197,7 +208,8 @@ function Import-MyMdeExclusions {
         [string]$ClientId = "",
         [string]$TenantId = "",
         [ValidateSet("Mac","Linux","Windows")][string]$OsFamily,
-        [ValidateSet("Directory","Process","FileExt")][string]$ExclusionType
+        [ValidateSet("Directory","Process","FileExt")][string]$ExclusionType,
+        [switch]$ExcludeDefaults
     )
 
     if($PSBoundParameters['Debug']) {
@@ -208,32 +220,52 @@ function Import-MyMdeExclusions {
     if (Test-Path $ExclusionFile) {
         $lineContent = Get-Content -Path $ExclusionFile
         $policy = New-MyBasePolicy -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily
-        # $exclusionTemplates = Get-Policy $OsFamily -FileName "Exclusions\ExclusionPolicies.json"
 
+        $builtInPolicies = $null
+        if($ExcludeDefaults) {
+            $builtInPath = Get-ModuleFilePath -Path "Policies\BuiltIn.json"
+            Write-Debug "Asking to read $builtInPath"
+            $builtInPolicies = Read-JsonFile -FilePath $builtInPath -ErrorAction Stop
+        }
+
+        $firstDrop = $true
         foreach($row in $lineContent) { 
             $exclusionText = $($row).ToString()
-            #$exclusion = $exclusionTemplates.$ExclusionType
-            #$str = $($row).ToString()
             Write-Debug "Exclusion Line: $str"
+            $defaultMatch = $false
+            
+            if($ExcludeDefaults) {
+                $match = Get-MyMatchingExclusionGroup -ExclusionGroups $builtInPolicies -InputString $exclusionText -ReturnWarning
+                $defaultMatch = ($match -ne $null)
+                Write-Debug "Exclusion '$exclusionText' default match result '$defaultMatch'."
+            }
 
-            $exclusion = New-MyExclusionSetting -ExclusionValue $exclusionText -ExclusionType $ExclusionType -OsFamily $OsFamily
-            if($OsFamily -eq "Windows") {
-                Write-Debug "Searching for setting in policy"
-                $matchingSettingInstance = $policy.settings | Where-Object {
-                    $_.settingInstance.settingDefinitionId -eq $exclusion.settingInstance.settingDefinitionId
-                }
+            if($defaultMatch -ne $true) {
+                $exclusion = New-MyExclusionSetting -ExclusionValue $exclusionText -ExclusionType $ExclusionType -OsFamily $OsFamily
+                if($OsFamily -eq "Windows") {
+                    Write-Debug "Searching for setting in policy"
+                    $matchingSettingInstance = $policy.settings | Where-Object {
+                        $_.settingInstance.settingDefinitionId -eq $exclusion.settingInstance.settingDefinitionId
+                    }
 
-                if($null -eq $matchingSettingInstance){
-                    Write-Debug "No settingInstance found for $($exclusion.settingInstance.settingDefinitionId)"
-                    $policy.settings += $exclusion
+                    if($null -eq $matchingSettingInstance){
+                        Write-Debug "No settingInstance found for $($exclusion.settingInstance.settingDefinitionId)"
+                        $policy.settings += $exclusion
+                    }
+                    else {
+                        Write-Debug "Adding $($exclusion.value.value) to the simpleSettingCollectionValue"
+                        $matchingSettingInstance.settingInstance.simpleSettingCollectionValue += $exclusion.settingInstance.simpleSettingCollectionValue[0];
+                    }
+                } else {
+                    Write-Debug "Adding exclusion to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
+                    $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
                 }
-                else {
-                    Write-Debug "Adding $($exclusion.value.value) to the simpleSettingCollectionValue"
-                    $matchingSettingInstance.settingInstance.simpleSettingCollectionValue += $exclusion.settingInstance.simpleSettingCollectionValue[0];
+            }
+            else {
+                if($firstDrop -eq $true) {
+                    Write-Warning "At least one exclusion path is being dropped from the policy '$PolicyName'."
+                    $firstDrop = $false
                 }
-            } else {
-                Write-Debug "Adding exclusion to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
-                $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
             }
         }
 
@@ -286,7 +318,8 @@ function Import-MyMdeCsvExclusions {
         [string]$PolicyDescription = "",
         [string]$ClientId = "",
         [string]$TenantId = "",
-        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily
+        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily,
+        [switch]$ExcludeDefaults
     )
 
     if($PSBoundParameters['Debug']) {
@@ -294,34 +327,58 @@ function Import-MyMdeCsvExclusions {
         $DebugPreference = 'Continue'
     }
 
+    $firstDrop = $true
     if (Test-Path $CsvFile) {
         $csvContent = Import-Csv -Path $CsvFile
         $policy = New-MyBasePolicy -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily
+
+        $builtInPolicies = $null
+        if($ExcludeDefaults) {
+            $builtInPath = Get-ModuleFilePath -Path "Policies\BuiltIn.json"
+            Write-Debug "Asking to read $builtInPath"
+            $builtInPolicies = Read-JsonFile -FilePath $builtInPath -ErrorAction Stop
+        }
 
         foreach ($row in $csvContent) {
             $exclusionText = $row.Exclusion
             $exclusionType = $row.ExclusionType
             Write-Debug "Adding a $exclusionType with value $exclusionText"
 
-            $exclusion = New-MyExclusionSetting -ExclusionValue $exclusionText -ExclusionType $exclusionType -OsFamily $OsFamily
-            if($OsFamily -eq "Windows") {
-                Write-Debug "Searching for setting in policy"
-                $matchingSettingInstance = $policy.settings | Where-Object {
-                    $_.settingInstance.settingDefinitionId -eq $exclusion.settingInstance.settingDefinitionId
-                }
+            $defaultMatch = $false
+            
+            if($ExcludeDefaults) {
+                $match = Get-MyMatchingExclusionGroup -ExclusionGroups $builtInPolicies -InputString $exclusionText -ReturnWarning
+                $defaultMatch = ($match -ne $null)
+                Write-Debug "Exclusion '$exclusionText' default match result '$defaultMatch'."
+            }
 
-                if($null -eq $matchingSettingInstance) {
-                    Write-Debug "No settingInstance found for $($exclusion.settingInstance.settingDefinitionId)"
-                    $policy.settings += $exclusion
+            if($defaultMatch -ne $true) {
+                $exclusion = New-MyExclusionSetting -ExclusionValue $exclusionText -ExclusionType $exclusionType -OsFamily $OsFamily
+                if($OsFamily -eq "Windows") {
+                    Write-Debug "Searching for setting in policy"
+                    $matchingSettingInstance = $policy.settings | Where-Object {
+                        $_.settingInstance.settingDefinitionId -eq $exclusion.settingInstance.settingDefinitionId
+                    }
+
+                    if($null -eq $matchingSettingInstance) {
+                        Write-Debug "No settingInstance found for $($exclusion.settingInstance.settingDefinitionId)"
+                        $policy.settings += $exclusion
+                    }
+                    else {
+                        Write-Debug "Adding $($exclusion.value.value) to the simpleSettingCollectionValue"
+                        $matchingSettingInstance.settingInstance.simpleSettingCollectionValue += $exclusion.settingInstance.simpleSettingCollectionValue[0];
+                    }
+                    
+                } else {
+                    Write-Debug "Adding exclusion to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
+                    $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
                 }
-                else {
-                    Write-Debug "Adding $($exclusion.value.value) to the simpleSettingCollectionValue"
-                    $matchingSettingInstance.settingInstance.simpleSettingCollectionValue += $exclusion.settingInstance.simpleSettingCollectionValue[0];
+            }
+            else {
+                if($firstDrop -eq $true) {
+                    Write-Warning "At least one exclusion path is being dropped from the policy '$PolicyName'."
+                    $firstDrop = $false
                 }
-                
-            } else {
-                Write-Debug "Adding exclusion to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
-                $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
             }
         }
 
@@ -559,6 +616,56 @@ function Read-JsonFile {
  The OS the exclusion is targeting
 
 #>
+function Test-MyCsvExclusions {
+    param (
+        [Parameter(Mandatory=$true)][string]$CsvFile,
+        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily,
+        [switch]$IncludeWarnings
+    )
+
+    if($PSBoundParameters['Debug']) {
+        Write-Debug "Changing DebugPreference from $DebugPreference to 'Continue'"
+        $DebugPreference = 'Continue'
+    }
+
+    if (Test-Path $CsvFile) {
+        $csvContent = Import-Csv -Path $CsvFile
+
+        $builtInPath = Get-ModuleFilePath -Path "Policies\BuiltIn.json"
+        Write-Debug "Asking to read $builtInPath"
+        $builtInPolicies = Read-JsonFile -FilePath $builtInPath -ErrorAction Stop
+        foreach ($row in $csvContent) {
+            $exclusionText = $row.Exclusion
+
+            $groupMatch = Get-MyMatchingExclusionGroup -ExclusionGroups $builtInPolicies -InputString $exclusionText -ReturnWarning:$IncludeWarnings
+
+            if($null -eq $groupMatch){
+                Write-Host "The exclusion text $exclusionText is unique"
+            }
+            else {
+                Write-Host "The exclusion text $exclusionText is part of the $groupMatch default exclusions."
+            }
+        }
+    }
+    else {
+        Write-Error "The $ExclusionFile does not exist."
+    }
+}
+Export-ModuleMember -Function Test-MyCsvExclusions
+
+<#
+ .Synopsis
+ Test a set of exclusions from the ExclusionFile against the built in exclusions
+
+ .Description
+
+ .Parameter ExclusionFile
+ File path of a file including exclusions to be compared against the default exclusions for the specified OS
+
+ .Parameter OsFamily
+ The OS the exclusion is targeting
+
+#>
 function Test-MyExclusions {
     param (
         [Parameter(Mandatory=$true)][string]$ExclusionFile,
@@ -571,13 +678,13 @@ function Test-MyExclusions {
     }
 
     if (Test-Path $ExclusionFile) {
-        $csvContent = Import-Csv -Path $ExclusionFile
+        $content = Get-Content -Path $ExclusionFile
 
         $builtInPath = Get-ModuleFilePath -Path "Policies\BuiltIn.json"
         Write-Debug "Asking to read $builtInPath"
         $builtInPolicies = Read-JsonFile -FilePath $builtInPath -ErrorAction Stop
         foreach ($row in $csvContent) {
-            $exclusionText = $row.Exclusion
+            $exclusionText = $row
 
             $groupMatch = Get-MyMatchingExclusionGroup -ExclusionGroups $builtInPolicies -InputString $exclusionText
 
