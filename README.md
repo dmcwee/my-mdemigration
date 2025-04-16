@@ -26,6 +26,7 @@ Microsoft Graph Powershell SDK must be installed in order to utilize this module
 ```powershell
 [Documents\WindowsPowerShell\Modules]> git clone https://github.com/dmcwee/my-mdemigration.git .
 ```
+
 > The module folder includes an install script to create a self signed certificate and sign the module. The install must be run in a powershell window with `bypass` or another permissive execution policy. After running the install script the module can be run with an execution policy that allows for self signed certificates.
 
 1. Launch a Powershell with *ExecutionPolicy Bypass* window and navigate to the `Documents\WindowsPowerShell\Modules\my-mdemigration` folder.
