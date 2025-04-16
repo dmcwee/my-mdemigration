@@ -101,3 +101,37 @@ generate a valid Microsoft Defender Antivirus Exclusion policy in the MDE servic
 > **Note:** Running in Debug will cause a JSON file of the policy to be generated in the local directory.
 
 **NEW:** Using the ExcludeDefaults switch will automatically check the exclusion paths against the default set of exclusions for MDE Windows Server features and if a match exists then the path will not be included as part of the policy when it is created. *Warning:* Some checks are performed for folder level exclusions when file exclusions are specified by the MDE Exclusion documentation, but may still be necessary in an environment. Users should review the policies after import for any potential omissions.
+
+### Import-MyMdeDefaultExclusions
+
+The Import-MyMdeDefaultExclusions creates an AV Exclusion policy for a defined set of Application/Services commonly run on a specific platform.
+
+#### Supported Applications
+
+* [SQL Server](https://learn.microsoft.com/en-us/troubleshoot/sql/database-engine/security/antivirus-and-sql-server)
+
+```powershell
+> Import-MyMdeDefaultExclusions -DefaultProduct Sql -PolicyName "Sql Exclusion Policy" -ClientId client-id -TenantId tenant-id -OsFamily Windows
+```
+
+### Test-MyCsvExclusions
+
+The Text-MyCsvExclusions function tests the lists of exclusions in a CSV file against the built in exclusions in MDE. Currently, only Microsoft Server exclusions are defined and checked for.
+
+> **Note:** The function can evaluate the specific exclusions as documented, but also includes some expanded exclusions (`-IncludeWarnings`) intended to catch less specific/broad exclusions. The intent is to reduce broad exclusions thus reducing the area an attacker could utilize to hide.
+
+**Example:** The SYSVOL exclusion `%sytemroot%\Sysvol\Domain\*.adm` is part of the built in exclusions, and the expanded exclusion would be to check for `%systemroot%\Sysvol\Domain\` path.
+
+```powershell
+> Test-MyCsvExclusions -CsvFile .\exclusionFile.csv -OsFamily Windows -IncludeWarnings
+```
+
+### Test-MyExclusions
+
+The Test-MyExclusions function tests the list of exclusions in a file with an exclusion-per-line format against the built in exclusions in MDE. Currently, only Microsoft Server exclusions are defined and checked for.
+
+> **Note:** This function only evaluates the specific exclusions as documented.
+
+```powershell
+> Test-MyExclusions -ExclusionFile .\exclusionFile.txt -OsFamily Windows
+```
