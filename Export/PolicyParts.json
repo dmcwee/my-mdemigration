@@ -1,0 +1,16 @@
+{
+    "choiceSettingValue": {
+        "@odata.type": "#microsoft.graph.deviceManagementConfigurationSetting",
+        "settingInstance": {
+            "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance",
+            "choiceSettingValue": {
+                "@odata.type": "#microsoft.graph.deviceManagementConfigurationChoiceSettingValue",
+                "children": [],
+                "settingValueTemplateReference": null,
+                "value": ""
+            },
+            "settingDefinitionId": "",
+            "settingInstanceTemplateReference": null
+        }
+    }
+}

@@ -1,9 +1,184 @@
 ﻿<#
  .Synopsis
- Internal function that accepts the string to check against a group of exclusions
+ Internal Function - Converts the exported policy setting into a ChoiceSettingValue policy.
 
  .Description
- Internal function that accepts the string to check against a group of exclusions
+ Converts the exported policy setting into a ChoiceSettingValue policy.
+
+ .Parameter Setting
+ A single instance of a Choice Setting Value exported policy Setting
+#>
+function ConvertTo-ChoiceSettingValue {
+    param(
+        $Setting
+    )
+
+    $builtInPath = Get-MyModuleFilePath -Path "Export\PolicyParts.json"
+    Write-Debug "Asking to read $builtInPath"
+    $policyParts = Read-JsonFile -FilePath $builtInPath -ErrorAction Stop
+
+    $choiceSettingValue = $policyParts.choiceSettingValue
+    $choiceSettingValue.settingInstance.choiceSettingValue.children = $Setting.settingInstance.choiceSettingValue.children
+    $choiceSettingValue.settingInstance.choiceSettingValue.settingValueTemplateReference = ConvertTo-SettingValueTemplateReference $Setting.settingInstance.choiceSettingValue.settingValueTemplateReference
+    $choiceSettingValue.settingInstance.choiceSettingValue.value = $Setting.settingInstance.choiceSettingValue.value
+    $choiceSettingValue.settingInstance.settingDefinitionId = $Setting.settingInstance.settingDefinitionId
+    $choiceSettingValue.settingInstance.settingInstanceTemplateReference = $Setting.settingInstance.settingInstanceTemplateReference
+
+    return $choiceSettingValue
+}
+
+<#
+ .Synopsis
+ Internal Function - Converts the exported setting value reference to a SettingValueTemplateReference
+
+ .Description
+ Converts the exported setting value reference to a SettingValueTemplateReference
+
+ .Parameter SettingValueReference
+ A single instance of a Setting Value Template Reference exported policy Setting
+#>
+function ConvertTo-SettingValueTemplateReference {
+    param($SettingValueReference)
+
+    if($null -ne $SettingValueReference) {
+        return @{
+            settingValueTemplateId = $SettingValueReference.settingValueTemplateId
+        }
+    }
+    else {
+        return $null
+    }
+}
+
+<#
+ .Synopsis
+ Internal Function - Converts the exported policy settings into a SimpleSetting policy.
+
+ .Description
+ Converts the exported policy settings into a SimpleSetting policy.
+
+ .Parameter Setting
+ A single instance of a Simple Setting policy Setting
+#>
+function ConvertTo-SimpleSettingInstance {
+    param(
+        $Setting
+    )
+
+    return @{
+        id = $Setting.Id
+        settingInstance = $Setting.settingInstance
+    }
+}
+
+<#
+ .Synopsis
+ Internal Function - Converts an exported setting into the proper policy setting type
+
+ .Description
+ Converts the exported policy settings into the correct types used to create/import the policy.
+
+ .Parameter ExportSettings
+ The exported Policy Settings from the Get-MyMdePolicySettings
+#>
+function ConvertTo-PolicySettings {
+    param(
+        $ExportSettings
+    )
+
+    $settings = @()
+    foreach($setting in $ExportSettings) {
+        Write-Debug "SettingInstance: '$setting'"
+        if($setting.settingInstance."@odata.type" -eq "#microsoft.graph.deviceManagementConfigurationChoiceSettingInstance") {
+            $settings += ConvertTo-ChoiceSettingValue $setting
+        }
+        elseif ($setting.settingInstance."@odata.type" -eq "#microsoft.graph.deviceManagementConfigurationSimpleSettingInstance" -or
+            $setting.settingInstance."@odata.type" -eq "#microsoft.graph.deviceManagementConfigurationGroupSettingCollectionInstance" -or
+            $setting.settingInstance."@odata.type" -eq "#microsoft.graph.deviceManagementConfigurationSimpleSettingCollectionInstance"
+        ) {
+            $settings += ConvertTo-SimpleSettingInstance $setting
+        }
+        else {
+            Write-Warning "Setting type '$($setting.settingInstance."@odata.type")' is unhandled and being omitted"
+        }
+    }
+    return $settings
+}
+
+<#
+ .Synopsis
+ Export MDE Policies from the specified tenant
+
+ .Description
+ Exports the MDE Policies in a tenant and writes them in a JSON format that can be 
+ used by the Import-MyPolicy to import the policy to a new or to the same tenant
+
+ .Parameter OutputPath
+ The folder path location where the policies will be written
+
+  .Parameter ClientId
+ The Client Id of the Module in Entra
+
+ .Parameter TenantId
+ The Tenant Id of the Entra Tenant where the module is registered
+
+#>
+function Export-MyMdePolicies {
+    param(
+        [string]$OutputPath,
+        [string]$ClientId,
+        [string]$TenantId
+    )
+
+    if($PSBoundParameters['Debug']) {
+        Write-Debug "Changing DebugPreference from $DebugPreference to 'Continue'"
+        $DebugPreference = 'Continue'
+    }
+
+    $policies = Get-MyMdePolicies -ClientId $ClientId -TenantId $TenantId
+    $policiesJson = ConvertTo-Json $policies -Depth 12 -Compress
+    $policiesObj = ConvertFrom-Json $policiesJson
+
+    foreach($policy in $policiesObj) {
+        $settings = Get-MyMdePolicySettings -PolicyId $($policy.id) -ClientId $ClientId -TenantId $TenantId
+        $settingsJson = ConvertTo-Json $settings -Depth 12 -Compress
+        $settingsObj = ConvertFrom-Json $settingsJson
+        Write-Debug "*** settingsObj ***"
+        Write-Debug $settingsJson
+        Write-Debug "***    end      ***"
+
+        $exportSettings = @()
+        $exportSettings += ConvertTo-PolicySettings -ExportSettings $settingsObj
+        Write-Debug "*** exportSettings ***"
+        Write-Debug $(ConvertTo-Json $exportSettings -Depth 12 -Compress)
+        Write-Debug "***      end       ***"
+
+        $devicePolicy = @{
+            name = $policy.name
+            description = $policy.description
+            settings = $exportSettings
+            platforms = $policy.platforms
+            technologies = $policy.technologies
+            templateReference = @{
+                templateId = $policy.templateReference.templateId
+            }
+        }
+
+        Write-Debug "Converting Policy to JSON object"
+        $policyJson = $devicePolicy | ConvertTo-Json -Depth 12 -Compress
+
+        $outputFilePath = "$OutputPath\$($devicePolicy.name).json"
+        $policyJson | Out-File -FilePath $outputFilePath
+    }
+}
+Export-ModuleMember -Function Export-MyMdePolicies
+
+<#
+ .Synopsis
+ Internal function - Accepts the string to check against a group of exclusions
+
+ .Description
+ Accepts the string to check against a group of exclusions
 
  .Parameter ExclusionGroups
  This object contains groups of MDE's default exclusion regular expressions to determine if InputString 
@@ -45,16 +220,70 @@ function Get-MyMatchingExclusionGroup {
 
 <#
  .Synopsis
- Internal Function to generate a path to files installed with the module
+ Internal Function - List the Device Management Policies in the tenant
 
  .Description
- Internal Function to generate a path to files installed with the module
+ List the Device Management Policies in the tenant. This is primarily an internal function, but may be 
+ exposed for testing purposes.
+
+ .Parameter ClientId
+
+ .Parameter TenantId
+#>
+function Get-MyMdePolicies {
+    param(
+        [string]$ClientId,
+        [string]$TenantId
+    )
+
+    $uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
+    Connect-MgGraph -ClientId $ClientId -TenantId $TenantId -Scopes DeviceManagementConfiguration.ReadWrite.All -NoWelcome
+    $policies = Invoke-MgGraphRequest -Method GET -Uri $uri
+    return $policies.value
+}
+# Export-ModuleMember -Function Get-MyMdePolicies
+
+<#
+ .Synopsis
+ Internal Function - List the Device Management Policy's settings
+
+ .Description
+ List the Device Management Policy's settings. This is primarily an internal function, but may be 
+ exposed for testing purposes.
+
+ .Parameter PolicyId
+ The ID of the policy the settings will be retrieved for
+
+ .Parameter ClientId
+
+ .Parameter TenantId
+#>
+function Get-MyMdePolicySettings {
+    param(
+        [string]$PolicyId,
+        [string]$ClientId,
+        [string]$TenantId
+    )
+
+    $uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies/$PolicyId/settings"
+    Connect-MgGraph -ClientId $ClientId -TenantId $TenantId -Scopes DeviceManagementConfiguration.ReadWrite.All -NoWelcome
+    $settings = Invoke-MgGraphRequest -Method GET -Uri $uri
+    return $settings.value
+}
+# Export-ModuleMember -Function Get-MyMdePolicySettings
+
+<#
+ .Synopsis
+ Internal Function - Generates a path to files installed with the module
+
+ .Description
+ Generates a path to files installed with the module
 
  .Parameter Path
  Function to consistently generate a path to a file held in the module's install location
 
 #>
-function Get-ModuleFilePath {
+function Get-MyModuleFilePath {
     param(
         [string]$Path
     )
@@ -70,6 +299,7 @@ function Get-ModuleFilePath {
  Internal Function - Read the Base or ExclusionPolicies JSON files deployed with the module
 
  .Description
+ Read the Base or ExclusionPolicies JSON files deployed with the module
 
  .Parameter OsFamily
  Operating system the policy is being created for
@@ -84,7 +314,7 @@ function Get-Policy {
         [string]$FileName)
 
     $path = "$OsFamily\$FileName"
-    $jPath = Get-ModuleFilePath -Path $path 
+    $jPath = Get-MyModuleFilePath -Path $path 
     $jsonObject = Read-JsonFile -FilePath $jPath
 
     return $jsonObject
@@ -137,6 +367,10 @@ function Import-MyDefaultParameters {
 
  .Parameter ClientId
  The Client Id of the Module in Entra
+
+ .Parameter TenantId
+ The Tenant Id of the Entra Tenant where the module is registered
+
 #>
 function Import-MyPolicy {
     param(
@@ -223,7 +457,7 @@ function Import-MyMdeExclusions {
 
         $builtInPolicies = $null
         if($ExcludeDefaults) {
-            $builtInPath = Get-ModuleFilePath -Path "Policies\BuiltIn.json"
+            $builtInPath = Get-MyModuleFilePath -Path "Policies\BuiltIn.json"
             Write-Debug "Asking to read $builtInPath"
             $builtInPolicies = Read-JsonFile -FilePath $builtInPath -ErrorAction Stop
         }
@@ -236,7 +470,7 @@ function Import-MyMdeExclusions {
             
             if($ExcludeDefaults) {
                 $match = Get-MyMatchingExclusionGroup -ExclusionGroups $builtInPolicies -InputString $exclusionText -ReturnWarning
-                $defaultMatch = ($match -ne $null)
+                $defaultMatch = ($null -ne $match)
                 Write-Debug "Exclusion '$exclusionText' default match result '$defaultMatch'."
             }
 
@@ -334,7 +568,7 @@ function Import-MyMdeCsvExclusions {
 
         $builtInPolicies = $null
         if($ExcludeDefaults) {
-            $builtInPath = Get-ModuleFilePath -Path "Policies\BuiltIn.json"
+            $builtInPath = Get-MyModuleFilePath -Path "Policies\BuiltIn.json"
             Write-Debug "Asking to read $builtInPath"
             $builtInPolicies = Read-JsonFile -FilePath $builtInPath -ErrorAction Stop
         }
@@ -348,7 +582,7 @@ function Import-MyMdeCsvExclusions {
             
             if($ExcludeDefaults) {
                 $match = Get-MyMatchingExclusionGroup -ExclusionGroups $builtInPolicies -InputString $exclusionText -ReturnWarning
-                $defaultMatch = ($match -ne $null)
+                $defaultMatch = ($null -ne $match)
                 Write-Debug "Exclusion '$exclusionText' default match result '$defaultMatch'."
             }
 
@@ -434,7 +668,7 @@ function Import-MyMdeDefaultExclusions {
     )
 
     $path = "Policies\$DefaultProduct.csv"
-    $pPath = Get-ModuleFilePath -Path $path
+    $pPath = Get-MyModuleFilePath -Path $path
 
     Import-MyMdeCsvExclusions -CsvFile $pPath -PolicyName $PolicyName -PolicyDescription $PolicyDescription -ClientId $ClientId -TenantId $TenantId -OsFamily $OsFamily
 }
@@ -510,73 +744,6 @@ function New-MyExclusionSetting {
 }
 
 <#
-Unnecessary Functions
-
-function New-MyMdeExclusions {
-    param(
-        [Parameter(Mandatory=$true)][string]$ExclusionFile,
-        [Parameter(Mandatory=$true)][string]$PolicyName,
-        [string]$PolicyDescription = "",
-        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily = "Windows",
-        [ValidateSet("Directory","File","FileExt","Process")][string]$ExclusionType = "Directory"
-    )
-
-    $policy = New-MyBasePolicy -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily
-
-    $exclusionTemplates = Get-Policy $OsFamily -FileName "Exclusions\ExclusionPolicies.json"
-
-    if (Test-Path $ExclusionFile) {
-        Get-Content $ExclusionFile | ForEach-Object { 
-            Write-Debug "Exclusion Line: $_"
-            $exclusion = $exclusionTemplates.$ExclusionType
-            $str = $($_).ToString()
-
-            if($OsFamily -eq "Windows") {
-                $exclusion.settingInstance.simpleSettingCollectionValue[0].value = $str
-                $policy.settings += $exclusion
-            } else {
-                if($ExclusionType -eq "Directory" -or $ExclusionType -eq "File") {
-                    Write-Debug "Updating a directory exclusion value with $str"
-                        $exclusion.children[0].choiceSettingValue.children[1].simpleSettingValue.value = $str
-                } else {
-                    Write-Debug "Updating a fileExt or Process exclusion value with $str"
-                    $exclusion.children[0].choiceSettingValue.children[0].simpleSettingValue.value = $str
-                }
-
-                Write-Debug "Adding exclusion to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
-                $policy.settings[0].settingInstance.groupSettingCollectionValue += $exclusion
-                Write-Debug "Exclusion was added to groupSettingsCollectionValue $($policy.settings[0].settingInstance.groupSettingCollectionValue.Count)"
-            }
-        }
-
-        return $policy
-
-    } else {
-        Write-Error "File not found: $ExclusionFile"
-    }
-}
-
-function New-MyMdeExclusionsFile {
-    param(
-        [Parameter(Mandatory=$true)][string]$ExclusionFile,
-        [Parameter(Mandatory=$true)][string]$PolicyName,
-        [string]$PolicyDescription = "",
-        [ValidateSet("Mac","Linux","Windows")][string]$OsFamily = "Windows",
-        [ValidateSet("Directory","File","FileExt","Process")][string]$ExclusionType = "Directory"
-    )
-
-    if($PSBoundParameters['Debug']) {
-        Write-Debug "Changing DebugPreference from $DebugPreference to 'Continue'"
-        $DebugPreference = 'Continue'
-    }
-
-    $policy = New-MyMdeExclusions -ExclusionFile $ExclusionFile -PolicyName $PolicyName -PolicyDescription $PolicyDescription -OsFamily $OsFamily -ExclusionType $ExclusionType
-
-    Write-JsonFile -PolicyObject $policy
-}
-#>
-
-<#
  .Synopsis
  Internal Function to Read a JSON file and return it as an Object
 
@@ -631,7 +798,7 @@ function Test-MyCsvExclusions {
     if (Test-Path $CsvFile) {
         $csvContent = Import-Csv -Path $CsvFile
 
-        $builtInPath = Get-ModuleFilePath -Path "Policies\BuiltIn.json"
+        $builtInPath = Get-MyModuleFilePath -Path "Policies\BuiltIn.json"
         Write-Debug "Asking to read $builtInPath"
         $builtInPolicies = Read-JsonFile -FilePath $builtInPath -ErrorAction Stop
         foreach ($row in $csvContent) {
@@ -680,10 +847,10 @@ function Test-MyExclusions {
     if (Test-Path $ExclusionFile) {
         $content = Get-Content -Path $ExclusionFile
 
-        $builtInPath = Get-ModuleFilePath -Path "Policies\BuiltIn.json"
+        $builtInPath = Get-MyModuleFilePath -Path "Policies\BuiltIn.json"
         Write-Debug "Asking to read $builtInPath"
         $builtInPolicies = Read-JsonFile -FilePath $builtInPath -ErrorAction Stop
-        foreach ($row in $csvContent) {
+        foreach ($row in $content) {
             $exclusionText = $row
 
             $groupMatch = Get-MyMatchingExclusionGroup -ExclusionGroups $builtInPolicies -InputString $exclusionText
@@ -704,10 +871,10 @@ Export-ModuleMember -Function Test-MyExclusions
 
 <#
  .Synopsis
- Internal Function to write an output to a JSON file
+ Internal Function -Write an output to a JSON file
 
  .Description
- Internal function to write a Policy Object to a specific JSON file
+ Write a Policy Object to a specific JSON file
 
  .Parameter PolicyObject
  The Exclusion policy object that should be written to a JSON output file
